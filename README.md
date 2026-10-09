@@ -408,8 +408,8 @@ curl -s "http://localhost:8000/api/health"
 
 #### 1. Clone Repository & Navigate
 ```bash
-git clone https://github.com/<your-username>/geospatial-measurement-api.git
-cd geospatial-measurement-api
+git clone https://github.com/Boggavarapupraveen/geospatial-file-measurement-api.git
+cd geospatial-file-measurement-api
 ```
 
 #### 2. Create and Activate Virtual Environment
