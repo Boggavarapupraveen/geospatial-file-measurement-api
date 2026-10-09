@@ -1,0 +1,13 @@
+services:
+  geomeasure-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geomeasure-api
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    volumes:
+      - ./uploads:/app/uploads
+    restart: unless-stopped

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>San Francisco Park &amp; Trails Survey</name>
+    <Placemark>
+      <name>Golden Gate Park Meadow</name>
+      <description>Spacious recreation lawn</description>
+      <ExtendedData>
+        <Data name="zone_code"><value>REC-01</value></Data>
+        <Data name="surface"><value>Grass</value></Data>
+        <Data name="capacity"><value>5000</value></Data>
+      </ExtendedData>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+              -122.486,37.769,0 -122.478,37.769,0 -122.478,37.765,0 -122.486,37.765,0 -122.486,37.769,0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+    <Placemark>
+      <name>Panhandle Multi-use Trail</name>
+      <description>Paved pedestrian and bike trail</description>
+      <ExtendedData>
+        <Data name="surface"><value>Asphalt</value></Data>
+        <Data name="lighting"><value>Yes</value></Data>
+      </ExtendedData>
+      <LineString>
+        <coordinates>
+          -122.455,37.772,0 -122.448,37.772,0 -122.443,37.771,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Conservatory of Flowers</name>
+      <description>Victorian greenhouse historic site</description>
+      <Point>
+        <coordinates>-122.460,37.772,0</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>

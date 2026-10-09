@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geospatial File Measurement Studio</title>
+  <meta name="description" content="High-precision geospatial measurement service for Shapefile and KML files with automatic UTM projection and WGS84 geodesic verification.">
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Design CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="logo-icon">🌐</div>
+      <div class="brand-text">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <h1>GeoMeasure API</h1>
+          <span class="brand-badge">FastAPI v1.0</span>
+        </div>
+      </div>
+    </div>
+    <div class="nav-links">
+      <a href="/docs" target="_blank" class="btn-nav">⚡ Interactive Swagger UI</a>
+      <a href="/redoc" target="_blank" class="btn-nav">📖 ReDoc API Specs</a>
+      <a href="/api/health" target="_blank" class="btn-nav">🩺 Health</a>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- Hero Banner -->
+    <section class="hero">
+      <h2>Geospatial File Measurement Studio</h2>
+      <p>
+        Upload ESRI Shapefiles or KML datasets to extract features, reproject geographic coordinates 
+        to minimum-distortion UTM zones, and calculate high-precision areas and lengths.
+      </p>
+    </section>
+
+    <!-- Upload Section -->
+    <section class="glass-panel upload-card" id="drop-zone">
+      <input type="file" id="file-input" accept=".zip,.kml" style="display: none;" />
+      <div class="upload-icon">📂</div>
+      <h3 class="upload-title">Drop your geospatial file here</h3>
+      <p class="upload-subtitle">or click to browse from your device (Max 50MB)</p>
+      
+      <div class="badge-formats">
+        <span class="badge badge-shp">📦 Shapefile (.zip with .shp, .dbf, .prj)</span>
+        <span class="badge badge-kml">📍 Keyhole Markup (.kml)</span>
+      </div>
+
+      <div class="sample-buttons">
+        <span style="font-size: 0.85rem; color: var(--text-muted); align-self: center;">Try Instant Samples:</span>
+        <button type="button" class="btn-sample" id="btn-sample-kml">✨ Load Sample KML (Park & Trails)</button>
+        <button type="button" class="btn-sample" id="btn-sample-shp">✨ Load Sample Shapefile (Polygons & Lines)</button>
+      </div>
+
+      <div id="upload-status" style="margin-top: 1rem; font-size: 0.9rem; font-weight: 500; display: none;"></div>
+    </section>
+
+    <!-- Metrics Grid -->
+    <section class="metrics-grid" id="metrics-panel" style="display: none;">
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Total Polygon Area</span>
+          <span class="metric-icon">📐</span>
+        </div>
+        <div class="metric-value" id="val-area-m2">0.00 m²</div>
+        <div class="metric-sub" id="val-area-ha">0.00 hectares (0.00 km²)</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Total Line Length</span>
+          <span class="metric-icon">📏</span>
+        </div>
+        <div class="metric-value" id="val-length-m">0.00 m</div>
+        <div class="metric-sub" id="val-length-km">0.00 km</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Feature Breakdown</span>
+          <span class="metric-icon">📊</span>
+        </div>
+        <div class="metric-value" id="val-feature-count">0</div>
+        <div class="metric-sub" id="val-feature-breakdown">0 Polys · 0 Lines · 0 Points</div>
+      </div>
+
+      <div class="metric-card">
+        <div class="metric-header">
+          <span class="metric-label">Projected CRS Strategy</span>
+          <span class="metric-icon">🧭</span>
+        </div>
+        <div class="metric-value" style="font-size: 1.15rem; font-weight: 700;" id="val-crs-name">EPSG:4326 → UTM</div>
+        <div class="metric-sub" id="val-crs-notes">Auto Centroid Zone Projection</div>
+      </div>
+    </section>
+
+    <!-- Map & Feature Table Split -->
+    <section class="grid-map-table" id="data-display" style="display: none;">
+      <!-- Interactive Leaflet Map -->
+      <div class="map-wrapper">
+        <div id="map"></div>
+      </div>
+
+      <!-- Feature Table -->
+      <div class="glass-panel table-card">
+        <div class="table-header">
+          <h3 class="table-title">Feature Measurements</h3>
+          <input type="text" id="table-search" class="table-search" placeholder="Filter features..." />
+        </div>
+        <div class="table-scroll">
+          <table id="measurements-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Type</th>
+                <th>Name / Properties</th>
+                <th>Measurements</th>
+                <th>Projected CRS</th>
+              </tr>
+            </thead>
+            <tbody id="table-body">
+              <!-- Populated dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Raw JSON Inspector -->
+    <section class="glass-panel" id="json-panel" style="display: none;">
+      <div class="json-tabs">
+        <button class="tab-btn active" data-tab="measurements">Measurements Payload</button>
+        <button class="tab-btn" data-tab="geojson">GeoJSON FeatureCollection</button>
+        <button class="tab-btn" data-tab="metadata">File Metadata</button>
+      </div>
+      <pre class="json-viewer"><code id="json-content">// Output will appear here...</code></pre>
+    </section>
+  </main>
+
+  <footer>
+    <p>Geospatial File Measurement API · Built with FastAPI, Shapely, PyProj, and Leaflet.js</p>
+  </footer>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- Dashboard JS -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
