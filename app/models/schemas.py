@@ -56,3 +56,4 @@ class GeoJSONFeatureCollection(BaseModel):
     name: Optional[str] = None
     crs: Optional[Dict[str, Any]] = None
     features: List[GeoJSONFeature]
+

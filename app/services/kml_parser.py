@@ -175,3 +175,4 @@ class KMLParser:
                 })
 
         return features, source_crs, crs_name
+

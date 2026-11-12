@@ -219,3 +219,4 @@ class FileProcessingService:
             shutil.rmtree(file_dir, ignore_errors=True)
             return True
         return False
+

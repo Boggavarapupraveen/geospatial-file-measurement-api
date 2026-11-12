@@ -62,3 +62,4 @@ def test_unsupported_geometry_handled_gracefully():
     assert result.measurement_type == "unsupported"
     assert result.primary_value is None
     assert "not supported" in result.note
+

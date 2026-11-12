@@ -160,3 +160,4 @@ class MeasurementService:
             units={},
             note=f"Geometry type '{geom_type}' is not supported for standard area or length calculation.",
         )
+

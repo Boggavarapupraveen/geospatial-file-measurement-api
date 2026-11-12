@@ -30,3 +30,4 @@ def test_shapefile_parser_reads_zipped_features():
     for f in features:
         assert f["geom_type"] == "Polygon"
         assert "Commercial District Alpha" in f["properties"].get("NAME", "") or "Greenwood Residential" in f["properties"].get("NAME", "")
+

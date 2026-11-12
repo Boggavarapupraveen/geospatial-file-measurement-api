@@ -47,3 +47,4 @@ def test_reproject_for_measurement_changes_units():
     # In projected UTM meters, proj_geom.area should be roughly ~160,000 m²
     assert proj_geom.area > 50000
     assert proj_geom.area < 500000
+

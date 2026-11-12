@@ -104,3 +104,4 @@ class ShapefileParser:
         finally:
             # Clean up extracted temp directory
             shutil.rmtree(extract_dir, ignore_errors=True)
+

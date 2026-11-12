@@ -25,3 +25,4 @@ def sample_shp_zip_bytes():
     if not shp_path.exists():
         generate_samples(SAMPLES_DIR)
     return shp_path.read_bytes()
+

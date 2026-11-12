@@ -19,3 +19,4 @@ VERSION = "1.0.0"
 
 ALLOWED_EXTENSIONS = {".zip", ".kml"}
 MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB
+

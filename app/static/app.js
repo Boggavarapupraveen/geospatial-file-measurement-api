@@ -549,3 +549,4 @@ async function deleteActiveFile() {
     alert("Error deleting file: " + e.message);
   }
 }
+
