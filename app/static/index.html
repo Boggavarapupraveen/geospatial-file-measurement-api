@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Geospatial File Measurement & GIS Explorer</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Leaflet CSS & JS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col font-sans antialiased">
+
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-800/90 backdrop-blur border-b border-slate-700/80 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-slate-950 font-bold text-xl">
+          <i data-lucide="globe-2" class="w-6 h-6 text-white"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg text-white leading-tight flex items-center gap-2">
+            GeoMeasure API
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">FastAPI</span>
+          </h1>
+          <p class="text-xs text-slate-400">Automated Reprojection & Geospatial Metric Measurement Engine</p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-3">
+        <a href="/docs" target="_blank" class="text-xs sm:text-sm font-medium px-3.5 py-1.5 rounded-lg bg-slate-700 hover:bg-slate-600 text-slate-200 transition-colors flex items-center gap-1.5 border border-slate-600">
+          <i data-lucide="file-code-2" class="w-4 h-4 text-emerald-400"></i>
+          API Docs (Swagger)
+        </a>
+        <a href="https://github.com/SaradaBoggavarapu" target="_blank" class="text-xs sm:text-sm font-medium px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-colors flex items-center gap-1.5 shadow-md shadow-emerald-600/30">
+          <i data-lucide="github" class="w-4 h-4"></i>
+          GitHub
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8 flex flex-col gap-6">
+
+    <!-- Hero / Status Banner -->
+    <div class="bg-gradient-to-r from-slate-800 via-slate-800/80 to-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl relative overflow-hidden">
+      <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none">
+        <i data-lucide="map" class="w-72 h-72"></i>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+        <div class="md:col-span-2 space-y-2">
+          <span class="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-emerald-400 bg-emerald-950/50 border border-emerald-800/50 px-2.5 py-1 rounded-md">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            Production Ready CRS & Geodesic Engine
+          </span>
+          <h2 class="text-2xl font-bold text-white">Geospatial File Measurement & Reprojection Service</h2>
+          <p class="text-slate-300 text-sm leading-relaxed">
+            Upload ESRI Shapefile archives (<code class="bg-slate-900 px-1.5 py-0.5 rounded text-emerald-300">.zip</code>) or Google Earth <code class="bg-slate-900 px-1.5 py-0.5 rounded text-emerald-300">.kml</code> files.
+            The engine detects geographic coordinate systems, safely reprojects features into optimal metric UTM zones (<code class="bg-slate-900 px-1.5 py-0.5 rounded text-amber-300">WGS84 UTM</code>), calculates planar Polygon Area & LineString Length without degree distortion, and handles Points gracefully.
+          </p>
+        </div>
+        <div class="flex flex-col gap-2 sm:flex-row md:flex-col justify-end">
+          <button id="btn-load-sample-kml" class="w-full text-xs font-semibold px-4 py-2.5 rounded-xl bg-slate-700/80 hover:bg-slate-600 border border-slate-600 text-slate-100 flex items-center justify-center gap-2 transition-all">
+            <i data-lucide="file-check-2" class="w-4 h-4 text-emerald-400"></i>
+            Load Sample KML (Park Survey)
+          </button>
+          <button id="btn-load-sample-shp" class="w-full text-xs font-semibold px-4 py-2.5 rounded-xl bg-slate-700/80 hover:bg-slate-600 border border-slate-600 text-slate-100 flex items-center justify-center gap-2 transition-all">
+            <i data-lucide="archive" class="w-4 h-4 text-teal-400"></i>
+            Load Sample Shapefile (.zip)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Upload & Quick Stats Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Upload Dropzone Card -->
+      <div class="lg:col-span-1 bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+              <i data-lucide="upload-cloud" class="w-5 h-5 text-emerald-400"></i>
+              Upload Geospatial File
+            </h3>
+            <span class="text-xs text-slate-400">Max 50MB</span>
+          </div>
+
+          <!-- Drop Area -->
+          <div id="dropzone" class="border-2 border-dashed border-slate-600 hover:border-emerald-500 bg-slate-900/60 hover:bg-slate-900/90 rounded-xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-3 group">
+            <div class="w-12 h-12 rounded-full bg-slate-800 group-hover:bg-emerald-500/20 text-slate-400 group-hover:text-emerald-400 flex items-center justify-center transition-colors">
+              <i data-lucide="file-up" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <p class="text-sm font-medium text-slate-200">Drag & drop your file here</p>
+              <p class="text-xs text-slate-400 mt-0.5">Supports <strong class="text-emerald-400">.kml</strong> or Shapefile <strong class="text-emerald-400">.zip</strong></p>
+            </div>
+            <input type="file" id="file-input" accept=".kml,.zip" class="hidden">
+            <button type="button" class="mt-1 text-xs font-semibold px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white shadow">
+              Browse File
+            </button>
+          </div>
+
+          <!-- Upload Status / Feedback -->
+          <div id="upload-status" class="mt-4 hidden p-3 rounded-xl border text-xs"></div>
+        </div>
+
+        <!-- Accepted formats info footer -->
+        <div class="mt-5 pt-4 border-t border-slate-700/80 text-xs text-slate-400 space-y-1">
+          <p class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i> <strong>Shapefile:</strong> Zip must contain <code class="text-slate-300">.shp</code>, <code class="text-slate-300">.shx</code>, <code class="text-slate-300">.dbf</code></p>
+          <p class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i> <strong>KML:</strong> Supports Polygons, Lines, Points, & holes</p>
+          <p class="flex items-center gap-1.5"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-400"></i> <strong>CRS Reprojection:</strong> Auto-transfers EPSG:4326 to metric UTM</p>
+        </div>
+      </div>
+
+      <!-- Active File Overview Card -->
+      <div class="lg:col-span-2 bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+              <i data-lucide="layers" class="w-5 h-5 text-teal-400"></i>
+              Active File Details & Summary
+            </h3>
+            <div id="active-file-actions" class="hidden flex items-center gap-2">
+              <a id="btn-download-geojson" href="#" target="_blank" class="text-xs px-2.5 py-1 rounded bg-slate-700 hover:bg-slate-600 text-slate-200 flex items-center gap-1">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i> GeoJSON
+              </a>
+              <button id="btn-delete-active-file" class="text-xs px-2.5 py-1 rounded bg-red-900/50 hover:bg-red-800 text-red-200 border border-red-700 flex items-center gap-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div id="file-summary-empty" class="py-12 text-center text-slate-400">
+            <i data-lucide="file-question" class="w-10 h-10 mx-auto text-slate-500 mb-2"></i>
+            <p class="text-sm font-medium">No file loaded</p>
+            <p class="text-xs text-slate-500">Upload a file or click one of the sample buttons above to explore.</p>
+          </div>
+
+          <!-- Summary Content -->
+          <div id="file-summary-content" class="hidden space-y-4">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                <span class="text-xs text-slate-400">Filename</span>
+                <p id="stat-filename" class="text-sm font-bold text-white truncate">-</p>
+                <span id="stat-filetype" class="text-[10px] text-emerald-400 uppercase font-mono">-</span>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                <span class="text-xs text-slate-400">Features</span>
+                <p id="stat-features" class="text-lg font-bold text-emerald-400">0</p>
+                <span id="stat-breakdown" class="text-[10px] text-slate-400">--</span>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                <span class="text-xs text-slate-400">Source CRS</span>
+                <p id="stat-crs" class="text-sm font-bold text-teal-300 truncate">-</p>
+                <span class="text-[10px] text-slate-400">Detected format</span>
+              </div>
+              <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700">
+                <span class="text-xs text-slate-400">Status</span>
+                <p id="stat-status" class="text-sm font-bold text-emerald-400">-</p>
+                <span id="stat-id" class="text-[10px] text-slate-400 font-mono">ID: -</span>
+              </div>
+            </div>
+
+            <!-- Reprojection Strategy Banner -->
+            <div class="bg-slate-950/70 border border-slate-700 rounded-xl p-3.5 flex items-start gap-3">
+              <div class="p-2 rounded-lg bg-emerald-500/10 text-emerald-400 mt-0.5">
+                <i data-lucide="compass" class="w-4 h-4"></i>
+              </div>
+              <div class="text-xs">
+                <p class="font-semibold text-slate-200">Autonomous Projection & Measurement Strategy</p>
+                <p id="stat-projection-note" class="text-slate-400 mt-0.5">
+                  Centroid coordinates dynamically determined the optimal Universal Transverse Mercator (UTM) zone. All polygons and linestrings were reprojected to meters before computing area and length.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Uploaded Files History Quick List -->
+        <div class="mt-4 pt-3 border-t border-slate-700">
+          <div class="flex items-center justify-between text-xs text-slate-400 mb-2">
+            <span>Previous Uploads (<span id="history-count">0</span>)</span>
+            <button id="btn-refresh-history" class="hover:text-emerald-400 flex items-center gap-1">
+              <i data-lucide="rotate-cw" class="w-3 h-3"></i> Refresh
+            </button>
+          </div>
+          <div id="history-chips" class="flex flex-wrap gap-2 max-h-20 overflow-y-auto">
+            <span class="text-xs text-slate-500 italic">No files in history</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map & Feature Inspection Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Interactive Leaflet Map Card -->
+      <div class="lg:col-span-2 bg-slate-800/90 border border-slate-700 rounded-2xl p-4 shadow-lg flex flex-col">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <i data-lucide="map-pin" class="w-5 h-5 text-emerald-400"></i>
+            Interactive Map Visualization
+          </h3>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="inline-flex items-center gap-1 text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800">
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span> Polygon (Area)
+            </span>
+            <span class="inline-flex items-center gap-1 text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-800">
+              <span class="w-2 h-2 rounded-full bg-cyan-400"></span> Line (Length)
+            </span>
+            <span class="inline-flex items-center gap-1 text-amber-400 bg-amber-950/60 px-2 py-0.5 rounded border border-amber-800">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span> Point (N/A)
+            </span>
+          </div>
+        </div>
+
+        <!-- Leaflet Map Container -->
+        <div id="map" class="w-full h-[450px] rounded-xl border border-slate-700 overflow-hidden shadow-inner bg-slate-950 z-0"></div>
+      </div>
+
+      <!-- Feature Measurement Inspector Card -->
+      <div class="lg:col-span-1 bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-white flex items-center gap-2">
+              <i data-lucide="ruler" class="w-5 h-5 text-emerald-400"></i>
+              Measurement Inspector
+            </h3>
+            <span id="selected-feature-badge" class="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-slate-300">Select a feature</span>
+          </div>
+
+          <!-- Feature Detail View -->
+          <div id="inspector-empty" class="py-16 text-center text-slate-400">
+            <i data-lucide="mouse-pointer-click" class="w-10 h-10 mx-auto text-slate-500 mb-2"></i>
+            <p class="text-sm font-medium">Click on any map geometry</p>
+            <p class="text-xs text-slate-500">or click a row in the table below to inspect its precise area, length, and attributes.</p>
+          </div>
+
+          <div id="inspector-content" class="hidden space-y-4">
+            <!-- Measurement Card -->
+            <div class="bg-gradient-to-br from-emerald-950/40 via-slate-900 to-slate-900 border border-emerald-600/30 rounded-xl p-4 shadow">
+              <div class="flex items-center justify-between text-xs text-emerald-400 mb-1">
+                <span id="inspector-meas-type" class="uppercase font-semibold tracking-wider font-mono">Measurement</span>
+                <span id="inspector-crs-code" class="text-[11px] bg-slate-800 px-2 py-0.5 rounded text-slate-300 border border-slate-700">CRS</span>
+              </div>
+              <div class="mt-1">
+                <p id="inspector-primary-val" class="text-2xl font-black text-white">-</p>
+                <p id="inspector-primary-unit" class="text-xs text-slate-400 capitalize">-</p>
+              </div>
+
+              <!-- Converted Units Grid -->
+              <div id="inspector-units-grid" class="mt-3 pt-3 border-t border-slate-800 grid grid-cols-2 gap-2 text-xs">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Feature Attributes Table -->
+            <div>
+              <h4 class="text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <i data-lucide="table-properties" class="w-3.5 h-3.5 text-slate-400"></i>
+                Feature Attributes
+              </h4>
+              <div class="bg-slate-900/80 rounded-xl border border-slate-700/80 max-h-48 overflow-y-auto">
+                <table class="w-full text-xs text-left">
+                  <tbody id="inspector-props-body" class="divide-y divide-slate-800">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-slate-700/80 text-[11px] text-slate-400">
+          <p>Calculations adhere strictly to non-degree metric transformations.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Table Section -->
+    <div class="bg-slate-800/90 border border-slate-700 rounded-2xl p-5 shadow-lg">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <div>
+          <h3 class="text-base font-semibold text-white flex items-center gap-2">
+            <i data-lucide="table" class="w-5 h-5 text-teal-400"></i>
+            Features & Measurements Data Table
+          </h3>
+          <p class="text-xs text-slate-400">Click any feature row to focus and inspect it on the map.</p>
+        </div>
+        
+        <!-- Filter and Search -->
+        <div class="flex items-center gap-2">
+          <input type="text" id="table-search" placeholder="Search by name or ID..." class="text-xs bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          <select id="table-filter-type" class="text-xs bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none focus:border-emerald-500">
+            <option value="ALL">All Geometries</option>
+            <option value="Polygon">Polygons</option>
+            <option value="LineString">LineStrings</option>
+            <option value="Point">Points</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Features Table -->
+      <div class="overflow-x-auto rounded-xl border border-slate-700 bg-slate-900/60">
+        <table class="w-full text-left text-xs text-slate-300">
+          <thead class="bg-slate-800/90 text-slate-400 font-semibold uppercase text-[10px] tracking-wider border-b border-slate-700">
+            <tr>
+              <th class="py-2.5 px-4">Feature ID</th>
+              <th class="py-2.5 px-4">Geometry Type</th>
+              <th class="py-2.5 px-4">Measurement</th>
+              <th class="py-2.5 px-4">Calculated Value</th>
+              <th class="py-2.5 px-4">Projected CRS</th>
+              <th class="py-2.5 px-4">Primary Attribute</th>
+            </tr>
+          </thead>
+          <tbody id="features-table-body" class="divide-y divide-slate-800">
+            <tr>
+              <td colspan="6" class="py-8 text-center text-slate-500 italic">No features loaded. Upload a file above.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-slate-800/60 border-t border-slate-800 py-4 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p>Geospatial File Measurement API &mdash; Built with FastAPI, Shapely, PyProj & Leaflet</p>
+      <div class="flex items-center gap-4">
+        <a href="/docs" class="hover:text-emerald-400 transition-colors">Swagger API Docs</a>
+        <a href="/redoc" class="hover:text-emerald-400 transition-colors">ReDoc</a>
+        <a href="/api/files/" class="hover:text-emerald-400 transition-colors">Files API</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- App Script -->
+  <script src="/static/app.js"></script>
+</body>
+</html>

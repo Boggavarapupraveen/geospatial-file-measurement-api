@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Metropolitan Park Geospatial Survey</name>
+    <description>Ground survey containing park boundary, fitness loop trail, and visitor landmarks.</description>
+    
+    <!-- Polygon: Lake / Reservoir -->
+    <Placemark id="feat-lake-01">
+      <name>Emerald Lake</name>
+      <description>Artificial recreational lake within park grounds.</description>
+      <ExtendedData>
+        <Data name="category"><value>Water Body</value></Data>
+        <Data name="depth_meters"><value>8.5</value></Data>
+        <Data name="maintenance"><value>City Parks Dept</value></Data>
+      </ExtendedData>
+      <Polygon>
+        <outerBoundaryIs>
+          <LinearRing>
+            <coordinates>
+              -122.335,47.608,0
+              -122.330,47.608,0
+              -122.330,47.612,0
+              -122.335,47.612,0
+              -122.335,47.608,0
+            </coordinates>
+          </LinearRing>
+        </outerBoundaryIs>
+      </Polygon>
+    </Placemark>
+
+    <!-- LineString: Walking Trail -->
+    <Placemark id="feat-trail-01">
+      <name>Pine Ridge Walking Trail</name>
+      <description>Paved multi-use trail looping along the eastern perimeter.</description>
+      <ExtendedData>
+        <Data name="surface"><value>Asphalt</value></Data>
+        <Data name="difficulty"><value>Easy</value></Data>
+      </ExtendedData>
+      <LineString>
+        <coordinates>
+          -122.335,47.608,0
+          -122.328,47.609,0
+          -122.327,47.613,0
+          -122.331,47.615,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+
+    <!-- Point: Visitor Center Landmark -->
+    <Placemark id="feat-landmark-01">
+      <name>Visitor Information Center</name>
+      <description>Park headquarters, restrooms, and emergency station.</description>
+      <ExtendedData>
+        <Data name="facility_type"><value>Office</value></Data>
+        <Data name="open_hours"><value>08:00 - 18:00</value></Data>
+      </ExtendedData>
+      <Point>
+        <coordinates>-122.332,47.610,15</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>
