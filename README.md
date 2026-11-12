@@ -337,7 +337,7 @@ geospatial-measurement-api/
 
 ### 1. Clone the Repository
 ```bash
-git clone https://github.com/SaradaBoggavarapu/geospatial-measurement-api.git
+git clone https://github.com/Boggavarapupraveen/geospatial-measurement-api.git
 cd geospatial-measurement-api
 ```
 
@@ -408,3 +408,4 @@ pytest -v
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
